@@ -11,6 +11,9 @@ Kunxian Huang 2023-10-25
 """
 import os,sys
 import logging
+import multiprocessing
+import time
+import signal
 from time import perf_counter,sleep,strftime,localtime
 
 PiPyADC_PATH = u'/Users/bean/work/pyana/PiPyADC'
@@ -32,6 +35,47 @@ def raw_to_voltage(raw_channel,v_per_digit):
     voltage = v_per_digit*adc_count
 
     return adc_ch,voltage
+
+def loop_infinite_measurements(ads,adcFilename):
+    # Arbitrary length tuple of input channel pair values to scan sequentially
+    CH_SEQUENCE = 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+
+    p = multiprocessing.current_process()
+
+    # sample rate 50 Hz , 0.02 sec -latency (0.01 sec)
+    sleep_duration = 1.0/50.0 - 0.01
+    adcFile = open(adcFilename,"w+",encoding="utf-8")
+    try:
+        signal.signal(signal.SIGINT,loop_handler)  
+        print("[PID:{}] acquiring resources".format(p.pid))
+        while(True):
+                start = perf_counter()  
+            # Returns list of integers, one result for each configured channel
+            raw_channels = ads.read_sequence(CH_SEQUENCE)
+            record_time = strftime('%c', localtime())
+            ch_l =[]
+            voltage_l=[]
+            for raw_channel in raw_channels:
+                ch, voltage = raw_to_voltage(raw_channel,ads.v_per_digit)
+                ch_l.append(ch)
+                voltage_l.append(voltage)
+
+            end = perf_counter()
+            exe_time = (end-start)
+            print("execute {}-times time {}\n".format(i,exe_time))
+            #print("epoch {} channel {} execute time {}\n".format(epoch,chs,exe_time))
+            for ch,voltage in zip(ch_l,voltage_l):
+                adcFile.write("CH:{:0>2d}\tVoltage:{:.4f}V\t\tTime:{%s}\n".format(ch,voltage,record_time))
+
+        
+
+            time.sleep(sleep_duration) # 50 Hz
+
+    except (KeyboardInterrupt, SystemExit):
+        pass
+    finally:
+        print("[PID:{}] releasing resources".format(p.pid))
+        
 
 
 def loop_oneminute_measurements(ads,adcFile):
@@ -79,3 +123,23 @@ def testrun():
 
     except KeyboardInterrupt:
         print("\nUser Exit.\n")
+
+
+def loop_test(adcFile):
+    p = multiprocessing.current_process()
+    try:
+        signal.signal(signal.SIGINT,loop_handler)  
+        print("[PID:{}] acquiring resources".format(p.pid))
+        while(True):       
+            print(adcFile)    
+            #working...
+            time.sleep(1.5)
+
+    except (KeyboardInterrupt, SystemExit):
+        pass
+    finally:
+        print("[PID:{}] releasing resources".format(p.pid))
+
+def loop_handler(signal, frame):
+    print("handler!!!")
+    sys.exit(10)
