@@ -15,6 +15,8 @@ import multiprocessing
 import time
 import signal
 from time import perf_counter,sleep,strftime,localtime
+import numpy as np
+from collections import deque
 
 PiPyADC_PATH = u'/Users/bean/work/pyana/PiPyADC'
 if PiPyADC_PATH not in sys.path:
@@ -36,7 +38,7 @@ def raw_to_voltage(raw_channel,v_per_digit):
 
     return adc_ch,voltage
 
-def loop_infinite_measurements(ads,adcFilename):
+def loop_infinite_measurements(adcFilename):
     # Arbitrary length tuple of input channel pair values to scan sequentially
     CH_SEQUENCE = 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
 
@@ -45,31 +47,54 @@ def loop_infinite_measurements(ads,adcFilename):
     # sample rate 50 Hz , 0.02 sec -latency (0.01 sec)
     sleep_duration = 1.0/50.0 - 0.01
     adcFile = open(adcFilename,"w+",encoding="utf-8")
+    r_count = 0
+    # prepare deque of size 25, and 16 deques are append to a list
+    voltage_deque = [ deque([0.0]*25,maxlen=25)  for i in range(16)]
+    time_deque = deque([' ']*25,maxlen=25)
     try:
         signal.signal(signal.SIGINT,loop_handler)  
         print("[PID:{}] acquiring resources".format(p.pid))
-        while(True):
+        with ADS79XX(ADS79XX_default_config) as ads:
+            while(True):
                 start = perf_counter()  
-            # Returns list of integers, one result for each configured channel
-            raw_channels = ads.read_sequence(CH_SEQUENCE)
-            record_time = strftime('%c', localtime())
-            ch_l =[]
-            voltage_l=[]
-            for raw_channel in raw_channels:
-                ch, voltage = raw_to_voltage(raw_channel,ads.v_per_digit)
-                ch_l.append(ch)
-                voltage_l.append(voltage)
+                # Returns list of integers, one result for each configured channel
+                raw_channels = ads.read_sequence(CH_SEQUENCE)
+                record_time = strftime('%c', localtime())
+                ch_l =[]
+                voltage_l=[]
+                for raw_channel in raw_channels:
+                    ch, voltage = raw_to_voltage(raw_channel,ads.v_per_digit)
+                    ch_l.append(ch)
+                    voltage_l.append(voltage)
 
-            end = perf_counter()
-            exe_time = (end-start)
-            print("execute {}-times time {}\n".format(i,exe_time))
-            #print("epoch {} channel {} execute time {}\n".format(epoch,chs,exe_time))
-            for ch,voltage in zip(ch_l,voltage_l):
-                adcFile.write("CH:{:0>2d}\tVoltage:{:.4f}V\t\tTime:{%s}\n".format(ch,voltage,record_time))
+                end = perf_counter()
+                exe_time = (end-start)
+                print("execute {}-times time {}\n".format(i,exe_time))
+                #print("epoch {} channel {} execute time {}\n".format(epoch,chs,exe_time))
+                for ch,voltage in zip(ch_l,voltage_l):
+                    adcFile.write("CH:{:0>2d}\tVoltage:{:.4f}V\t\tTime:{%s}\n".format(ch,voltage,record_time))
+                    try:
+                        voltage_deque[ch].appendleft(voltage)
+                    except IndexError:
+                        pass
 
-        
+                time_deque.appendleft(record_time)
+                # every 50 times write to temporaly file which is for graphing
+                if (r_count>0 and r_count%25==0):
+                    voltage_list = list()
+                    for voltage_ch in voltage_deque:
+                        voltage_list.append(list(voltage_ch))
 
-            time.sleep(sleep_duration) # 50 Hz
+                    voltage_npy = np.array(voltage_list)
+                    with open('temp/voltagetmp.npy', 'wb') as fv:
+                        np.save(fv, voltage_npy) 
+
+                    with open('temp/time.txt', 'w+') as ft:
+                        ft.write("Time:{%s}".format(record_time))  
+       
+
+                r_count+=1
+                time.sleep(sleep_duration) # 50 Hz
 
     except (KeyboardInterrupt, SystemExit):
         pass
