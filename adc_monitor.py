@@ -178,7 +178,7 @@ def update_time(n):
     with open('temp/time.txt', 'r') as ft:
         time_content = ft.readline()
         
-    return html.Span('Last reading time: {}'.format(time_content))
+    return html.Span('Last reading time {}'.format(time_content))
 
 # Multiple components can update everytime interval gets fired.
 @app.callback(Output('live-update-adc-graph', 'figure'),

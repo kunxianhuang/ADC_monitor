@@ -55,6 +55,9 @@ def loop_infinite_measurements(adcFilename):
         signal.signal(signal.SIGINT,loop_handler)  
         print("[PID:{}] acquiring resources".format(p.pid))
         with ADS79XX(ADS79XX_default_config) as ads:
+            ads.set_auto2mode(retain_last=1,reset=1)
+            ads.set_auto2mode(retain_last=0,reset=0)
+            ads.set_programauto2()
             while(True):
                 start = perf_counter()  
                 # Returns list of integers, one result for each configured channel
