@@ -72,7 +72,7 @@ def loop_infinite_measurements(adcFilename):
                 print("execute {}-times time {}\n".format(i,exe_time))
                 #print("epoch {} channel {} execute time {}\n".format(epoch,chs,exe_time))
                 for ch,voltage in zip(ch_l,voltage_l):
-                    adcFile.write("CH:{:0>2d}\tVoltage:{:.4f}V\t\tTime:{%s}\n".format(ch,voltage,record_time))
+                    adcFile.write("CH:{:0>2d}\tVoltage:{:.4f}V\t\tTime:{}\n".format(ch,voltage,record_time))
                     try:
                         voltage_deque[ch].appendleft(voltage)
                     except IndexError:
@@ -90,7 +90,7 @@ def loop_infinite_measurements(adcFilename):
                         np.save(fv, voltage_npy) 
 
                     with open('temp/time.txt', 'w+') as ft:
-                        ft.write("Time:{%s}".format(record_time))  
+                        ft.write("Time:{}".format(record_time))  
        
 
                 r_count+=1
