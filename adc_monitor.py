@@ -3,6 +3,7 @@
 
 import os,sys
 from datetime import datetime
+import numpy as np
 import dash
 #import dash_core_components as dcc
 #import dash_html_components as html
@@ -31,7 +32,7 @@ prol = []
 styles = {
         'pre': {
                     'border': 'thin lightgrey solid',
-                    'overflowX': 'scroll'
+                    'overflowX': 'scroll',
                 }
 }
 
@@ -39,7 +40,7 @@ blue_button_style = {'background-color': '#00FFFF',
                       'color': 'black',
                       'width': '340px',
                       'height': '82px',
-                      'font-size': '18px'
+                      'font-size': '18px',
                       }
 
 
@@ -47,26 +48,26 @@ yellow_button_style = {'background-color': 'LemonChiffon',
                       'color': 'grey',
                       'width': '340px',
                       'height': '82px',
-                      'font-size': '18px'
+                      'font-size': '18px',
                       }
 
 white_button_style = {'background-color': 'white',
                       'color': 'black',
                       'width': '340px',
                       'height': '82px',
-                      'font-size': '18px'
+                      'font-size': '18px',
                       }
 
 red_button_style = {'background-color': 'red',
                     'color': 'grey',
                     'width': '340px',
                       'height': '82px',
-                      'font-size': '18px'
+                      'font-size': '18px',
                     }
 
 
-app.layout = html.Div([
-    html.H1("Fiber detector monitoring", style={'textAlign': 'center'}),
+app.layout = html.Div(children=[
+    html.H1("Fiber detector monitoring",style={'textAlign': 'center'}),
 
     html.Div(className='row', children=[
         # Button for start ADS79XX reading
@@ -89,12 +90,12 @@ app.layout = html.Div([
             id='file_name_output', # id for corresponding call back
             children='File to save' # Saving file name
         )
-    ],style={'width':"800px", 'margin':'0','left':'50%'})
+    ],style={'width':"800px", 'margin':'0','left':'50%'}),
 
     html.Div(id='live-update-adc-text'),
-    html.Div([
+    html.Div(children=[
         dcc.Graph(id='live-update-adc-graph')
-        ], style={'display': 'inline-block', 'width': '70%'})
+        ], style={'display': 'inline-block', 'width': '70%'}),
 
     dcc.Interval(
         id='interval-component',
@@ -171,7 +172,7 @@ def EnableStartADC(button_clicks):
     else: 
         return red_button_style, True
 
-@callback(Output('live-update-adc-text', 'children'),
+@app.callback(Output('live-update-adc-text', 'children'),
         Input('interval-component', 'n_intervals'))
 def update_time(n):
     with open('temp/time.txt', 'r') as ft:
@@ -180,7 +181,7 @@ def update_time(n):
     return html.Span('Last reading time: {}'.format(time_content))
 
 # Multiple components can update everytime interval gets fired.
-@callback(Output('live-update-adc-graph', 'figure'),
+@app.callback(Output('live-update-adc-graph', 'figure'),
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n_inter):
     x_label = ["CH0","CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8","CH9","CH10","CH11","CH12","CH13","CH14","CH15"]
@@ -193,7 +194,7 @@ def update_graph_live(n_inter):
     # Customize aspect
     fig.update_traces(marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',
                   marker_line_width=1.5, opacity=0.6)
-    fig.update_layout(title_text='ADC valie live update',yaxis_range=[0.0,5.1],yaxis_title="Voltage (V)")
+    fig.update_layout(title_text='ADC value live update',yaxis_range=[0.0,5.1],yaxis_title="Voltage (V)")
     #fig = px.bar(voltage_chs, labels={'index': 'Channel #', 'value':'Voltage (V)'})
     return fig
 
