@@ -15,6 +15,7 @@ import multiprocessing
 import time
 import signal
 from time import perf_counter,sleep,strftime,localtime
+from datetime import datetime
 import numpy as np
 from collections import deque
 
@@ -62,7 +63,8 @@ def loop_infinite_measurements(adcFilename):
                 start = perf_counter()  
                 # Returns list of integers, one result for each configured channel
                 raw_channels = ads.read_sequence(CH_SEQUENCE)
-                record_time = strftime('%c', localtime())
+                #record_time = strftime('%c', localtime())
+                record_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
                 ch_l =[]
                 voltage_l=[]
                 for raw_channel in raw_channels:
