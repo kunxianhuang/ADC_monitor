@@ -220,7 +220,7 @@ def update_graph_live(n_inter):
     fig_fitposition = go.Scatter(x=x_array, y=fit_array,mode='lines+markers')
     fig_fit = go.Figure(data=[fig_adcposition,fig_fitposition])
 
-    fig_fit.update_layout(title_text='ADC value live update',yaxis_range=[0.0,5.0],yaxis_title="Voltage (V)/Fitted waveform")
+    fig_fit.update_layout(title_text='ADC and gaussian fit live update',yaxis_range=[0.0,5.0],yaxis_title="Voltage (V)")
     fit_span = html.Span('Beam property: Mean {} mm, Sigma {} mm'.format(mu,sigma))
     return fig_adc,fig_fit,fit_span
 
