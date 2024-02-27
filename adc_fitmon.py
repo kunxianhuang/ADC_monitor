@@ -217,7 +217,7 @@ def update_graph_live(n_inter):
     vol_substract = np.subtract(voltage_array,pedestal_array)
 
     fig_adcposition = go.Bar(x=x_array, y=vol_substract,name="ADC_value")
-    fig_fitposition = go.Scatter(x=x_array, y=fit_array,mode='lines+markers',name="fitted Gaussian")
+    fig_fitposition = go.Scatter(x=x_array, y=fit_array,mode='lines+markers',marker_size=20,name="fitted Gaussian")
     fig_fit = go.Figure(data=[fig_adcposition,fig_fitposition])
 
     fig_fit.update_layout(title_text='ADC and gaussian fit live update',yaxis_title="Voltage (V)")
