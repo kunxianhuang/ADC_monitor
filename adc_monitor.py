@@ -16,10 +16,10 @@ import pandas as pd
 import multiprocessing
 import signal
 #import read_ads79XX
-#from read_ads79XX import loop_test
+from read_ads79XX import loop_test
 
-from test_example import test_loop
-from test_example.test_loop import loop_test
+#from test_example import test_loop
+#from test_example.test_loop import loop_test
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
