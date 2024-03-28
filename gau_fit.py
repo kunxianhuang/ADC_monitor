@@ -24,4 +24,4 @@ def gau_fit(x_array,voltage_array,pedestal_array):
     sigma = popt[1]
     A = popt[2]
     fit_array = gauss_fn(x_array, *popt)
-    return mu,sigma,fit_array
+    return mu,sigma,A,fit_array
