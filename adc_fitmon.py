@@ -213,17 +213,20 @@ def update_graph_live(n_inter):
     higher_ = 1.0*adc_num/2
     x_array = np.linspace(lower_,higher_,adc_num)
     x_array = fiber_interval*x_array
-    mu,sigma,A,fit_array = gau_fit(x_array,voltage_array,pedestal_array)
-    vol_substract = np.subtract(voltage_array,pedestal_array)
+    # mu,sigma,A,fit_array = gau_fit(x_array,voltage_array,pedestal_array)
+    # vol_substract = np.subtract(voltage_array,pedestal_array)
+    mu,sigma,A,fit_array = gau_fit(x_array[8:],voltage_array[8:],pedestal_array[8:])
+    vol_substract = np.subtract(voltage_array[8:],pedestal_array[8:])
 
-    x_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
+    # x_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
+    x_line_array = np.linspace(0.0*fiber_interval,higher_*fiber_interval,1000)
     y_line_array = gauss_fn(x_line_array,mu,sigma,A)
 
-    fig_adcposition = go.Bar(x=x_array,y=vol_substract,name="ADC_value")
+    fig_adcposition = go.Bar(x=x_array,y=vol_substract,name="Voltage_value")
     fig_fitposition = go.Scatter(x=x_line_array,y=y_line_array,mode='lines',marker_size=20,name="fitted Gaussian")
     fig_fit = go.Figure(data=[fig_adcposition,fig_fitposition])
 
-    fig_fit.update_layout(title_text='ADC and gaussian fit live update',yaxis_title="Voltage (V)")
+    fig_fit.update_layout(title_text='Voltage and gaussian fit live update',yaxis_title="Voltage (V)")
     fit_span = html.Span('Beam property: Mean {} mm, Sigma {} mm'.format(mu,sigma))
     return fig_adc,fig_fit,fit_span
 
