@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ Fitting of voltage value of 16 ADCs by Gaussian function
 
-Kunxian Huang 2023-02-22
+Kunxian Huang 2024-02-22
 """
 
 import numpy as np

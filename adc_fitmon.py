@@ -213,13 +213,13 @@ def update_graph_live(n_inter):
     higher_ = 1.0*adc_num/2
     x_array = np.linspace(lower_,higher_,adc_num)
     x_array = fiber_interval*x_array
-    # mu,sigma,A,fit_array = gau_fit(x_array,voltage_array,pedestal_array)
-    # vol_substract = np.subtract(voltage_array,pedestal_array)
-    mu,sigma,A,fit_array = gau_fit(x_array[8:],voltage_array[8:],pedestal_array[8:])
-    vol_substract = np.subtract(voltage_array[8:],pedestal_array[8:])
+    mu,sigma,A,fit_array = gau_fit(x_array,voltage_array,pedestal_array)
+    vol_substract = np.subtract(voltage_array,pedestal_array)
+    # mu,sigma,A,fit_array = gau_fit(x_array[8:],voltage_array[8:],pedestal_array[8:])
+    # vol_substract = np.subtract(voltage_array[8:],pedestal_array[8:])
 
-    # x_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
-    x_line_array = np.linspace(0.0*fiber_interval,higher_*fiber_interval,1000)
+    x_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
+    # x_line_array = np.linspace(0.0*fiber_interval,higher_*fiber_interval,1000)
     y_line_array = gauss_fn(x_line_array,mu,sigma,A)
 
     fig_adcposition = go.Bar(x=x_array,y=vol_substract,name="Voltage_value")
