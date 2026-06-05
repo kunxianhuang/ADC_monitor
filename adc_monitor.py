@@ -15,8 +15,9 @@ import plotly.graph_objects as go
 import pandas as pd
 import multiprocessing
 import signal
-#import read_ads79XX
-from read_ads79XX import loop_test
+import read_ads79XX
+
+from read_ads79XX import loop_infinite_measurements
 
 #from test_example import test_loop
 #from test_example.test_loop import loop_test
@@ -116,9 +117,11 @@ def PushStartADC(button_clicks):
     #print(button_clicks)
     if button_clicks:
         start_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = 'data/ADC_'+ start_time +'.txt'
+        cwd = os.getcwd()
+        filename = cwd+'/data/ADC_'+ start_time +'.txt'
 
-        p = multiprocessing.Process(target=loop_test,args=(filename,))
+        #p = multiprocessing.Process(target=loop_test,args=(filename,))
+        p = multiprocessing.Process(target=loop_infinite_measurements,args=(filename,))
         p.start()
         prol.append(p)
         # disable StartADC button
@@ -178,7 +181,7 @@ def update_time(n):
     with open('temp/time.txt', 'r') as ft:
         time_content = ft.readline()
         
-    return html.Span('Last reading time {}'.format(time_content))
+    return html.Span('Last reading {}'.format(time_content))
 
 # Multiple components can update everytime interval gets fired.
 @app.callback(Output('live-update-adc-graph', 'figure'),
@@ -195,7 +198,7 @@ def update_graph_live(n_inter):
     fig.update_traces(marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',
                   marker_line_width=1.5, opacity=0.6)
     fig.update_layout(title_text='ADC value live update',yaxis_range=[0.0,5.1],yaxis_title="Voltage (V)")
-    #fig = px.bar(voltage_chs, labels={'index': 'Channel #', 'value':'Voltage (V)'})
+
     return fig
 
 
