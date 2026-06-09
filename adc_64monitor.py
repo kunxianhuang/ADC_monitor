@@ -95,7 +95,7 @@ app.layout = html.Div(children=[
     html.Div(id='live-update-adc-text'),
     html.Div(children=[
         dcc.Graph(id='live-update-adc-graph')
-        ], style={'display': 'inline-block', 'width': '70%'}),
+        ], style={'display': 'inline-block', 'width': '80%'}),
 
     dcc.Interval(
         id='interval-component',
