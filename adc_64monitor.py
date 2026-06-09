@@ -19,8 +19,7 @@ import read_ads79XX
 
 from read_ads79XX import loop_infinite_measurements
 
-#from test_example import test_loop
-#from test_example.test_loop import loop_test
+
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -121,7 +120,7 @@ def PushStartADC(button_clicks):
         filename = cwd+'/data/ADC_'+ start_time +'.txt'
 
         #p = multiprocessing.Process(target=loop_test,args=(filename,))
-        p = multiprocessing.Process(target=loop_infinite_measurements,args=(filename,))
+        p = multiprocessing.Process(target=loop_infinite_64measurements,args=(filename,))
         p.start()
         prol.append(p)
         # disable StartADC button
@@ -187,9 +186,12 @@ def update_time(n):
 @app.callback(Output('live-update-adc-graph', 'figure'),
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n_inter):
-    x_label = ["CH0","CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8","CH9","CH10","CH11","CH12","CH13","CH14","CH15"]
+    x_label = ["CH0","CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8","CH9","CH10","CH11","CH12","CH13","CH14","CH15",
+               "CH16","CH17","CH18","CH19","CH20","CH21","CH22","CH23","CH24","CH25","CH26","CH27","CH28","CH29","CH30","CH31",
+               "CH32","CH33","CH34","CH35","CH36","CH37","CH38","CH39","CH40","CH41","CH42","CH43","CH44","CH45","CH46","CH47",
+               "CH48","CH49","CH50","CH51","CH52","CH53","CH54","CH55","CH56","CH57","CH58","CH59","CH60","CH61","CH62","CH63"]
     # reading voltage array and drawing a plot 
-    with open('temp/voltagetmp.npy', 'rb') as fv:
+    with open('temp/voltage64tmp.npy', 'rb') as fv:
         voltage_array = np.load(fv)
     
     voltage_chs = np.mean(voltage_array,axis=1)

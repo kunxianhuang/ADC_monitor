@@ -169,7 +169,7 @@ def loop_infinite_64measurements(adcFilename):
                         voltage_list.append(list(voltage_ch))
 
                     voltage_npy = np.array(voltage_list)
-                    with open('temp/voltagetmp.npy', 'wb') as fv:
+                    with open('temp/voltage64tmp.npy', 'wb') as fv:
                         np.save(fv, voltage_npy) 
 
 
