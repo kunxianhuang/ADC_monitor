@@ -91,11 +91,7 @@ app.layout = html.Div(children=[
         )
     ],style={'width':"800px", 'margin':'0','left':'50%'}),
 
-    html.Div(id='live-update-adc-graph'),
-    html.Div(children=[
-        dcc.Graph(id='live-update-adc-graph')
-        ], style={'display': 'inline-block', 'width': '70%'}),
-
+    
     html.Div(id='live-update-heatmap-and-gaussian-fit-graph'),
     html.Div(children=[
         dcc.Graph(id='live-update-fitting-graph')
