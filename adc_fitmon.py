@@ -15,8 +15,8 @@ import plotly.graph_objects as go
 import pandas as pd
 import multiprocessing
 import signal
-#import read_ads79XX
-from read_ads79XX import loop_test
+
+from read_ads79XX import loop_test,loop_infinite_measurements
 from gau_fit import gau_fit,gauss_fn
 
 #from test_example import test_loop
@@ -101,7 +101,7 @@ app.layout = html.Div(children=[
     html.Div(id='live-update-gaussian-fit-text'),
     html.Div(children=[
         dcc.Graph(id='live-update-fitting-graph')
-        ], style={'display': 'inline-block', 'width': '60%'}),
+        ], style={'display': 'inline-block', 'width': '80%'}),
 
     dcc.Interval(
         id='interval-component',
@@ -124,7 +124,7 @@ def PushStartADC(button_clicks):
         start_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = 'data/ADC_'+ start_time +'.txt'
 
-        p = multiprocessing.Process(target=loop_test,args=(filename,))
+        p = multiprocessing.Process(target=loop_infinite_measurements,args=(filename,))
         p.start()
         prol.append(p)
         # disable StartADC button
@@ -189,7 +189,7 @@ def update_time(n):
 # Multiple components can update everytime interval gets fired.
 @app.callback([Output('live-update-adc-graph', 'figure'),
                 Output('live-update-fitting-graph','figure'),
-                Output(id='live-update-gaussian-fit-text')],
+                Output('live-update-gaussian-fit-text', 'children')],
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n_inter):
     x_label = ["CH0","CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8","CH9","CH10","CH11","CH12","CH13","CH14","CH15"]
@@ -205,7 +205,7 @@ def update_graph_live(n_inter):
     # Customize aspect
     fig_adc.update_traces(marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',
                   marker_line_width=1.5, opacity=0.6)
-    fig_adc.update_layout(title_text='ADC value live update',yaxis_range=[0.0,5.1],yaxis_title="Voltage (V)")
+    fig_adc.update_layout(title_text='ADC value live update',yaxis_range=[0.0,6.05],yaxis_title="Voltage (V)")
     #fig = px.bar(voltage_chs, labels={'index': 'Channel #', 'value':'Voltage (V)'})
     adc_num = 16
     fiber_interval = 2.5 # fiber diameter as interval of each channel
@@ -214,9 +214,8 @@ def update_graph_live(n_inter):
     x_array = np.linspace(lower_,higher_,adc_num)
     x_array = fiber_interval*x_array
     mu,sigma,A,fit_array = gau_fit(x_array,voltage_chs,pedestal_array)
-    vol_substract = np.subtract(voltage_array,pedestal_array)
-    # mu,sigma,A,fit_array = gau_fit(x_array[8:],voltage_array[8:],pedestal_array[8:])
-    # vol_substract = np.subtract(voltage_array[8:],pedestal_array[8:])
+    vol_substract = np.subtract(voltage_chs,pedestal_array)
+    
 
     x_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
     # x_line_array = np.linspace(0.0*fiber_interval,higher_*fiber_interval,1000)
@@ -227,7 +226,7 @@ def update_graph_live(n_inter):
     fig_fit = go.Figure(data=[fig_adcposition,fig_fitposition])
 
     fig_fit.update_layout(title_text='Voltage and gaussian fit live update',yaxis_title="Voltage (V)")
-    fit_span = html.Span('Beam property: Mean {} mm, Sigma {} mm'.format(mu,sigma))
+    fit_span = html.Span('Beam property: Mean {:.2f} mm, Sigma {:.2f} mm'.format(mu,sigma))
     return fig_adc,fig_fit,fit_span
 
 
