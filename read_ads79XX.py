@@ -75,7 +75,10 @@ def loop_infinite_measurements(adcFilename):
 
                 end = perf_counter()
                 exe_time = (end-start)
-                #print("execute {}-times time {}\n".format(i,exe_time))
+
+
+
+                #print("execute time {}\n".format(exe_time))
                 #print("epoch {} channel {} execute time {}\n".format(epoch,chs,exe_time))
                 for ch,voltage in zip(ch_l,voltage_l):
                     adcFile.write("CH:{:0>2d}\tVoltage:{:.4f}V\t\tTime:{}\n".format(ch,voltage,record_time))
@@ -151,7 +154,9 @@ def loop_infinite_64measurements(adcFilename):
 
                     end = perf_counter()
                     exe_time = (end-start)
-                    #print("execute {}-times time {}\n".format(i,exe_time))
+
+                    #print("execute time {}\n".format(exe_time))
+
                     #print("epoch {} channel {} execute time {}\n".format(epoch,chs,exe_time))
                     for ch,voltage in zip(ch_la,voltage_l):
                         adcFile.write("CH:{:0>2d}\tVoltage:{:.4f}V\t\tTime:{}\n".format(ch,voltage,record_time))

@@ -5,22 +5,20 @@ import os,sys
 from datetime import datetime
 import numpy as np
 import dash
-#import dash_core_components as dcc
-#import dash_html_components as html
+
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import pandas as pd
 import multiprocessing
 import signal
 #import read_ads79XX
-from read_ads79XX import loop_test
+from read_ads79XX import loop_infinite_64measurements
 from gau_fit import gau_fit,gauss_fn
 
-#from test_example import test_loop
-#from test_example.test_loop import loop_test
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -68,7 +66,7 @@ red_button_style = {'background-color': 'red',
 
 
 app.layout = html.Div(children=[
-    html.H1("Fiber detector monitoring",style={'textAlign': 'center'}),
+    html.H1("Fiber detector monitoring with 64 channels",style={'textAlign': 'center'}),
 
     html.Div(className='row', children=[
         # Button for start ADS79XX reading
@@ -93,12 +91,8 @@ app.layout = html.Div(children=[
         )
     ],style={'width':"800px", 'margin':'0','left':'50%'}),
 
-    html.Div(id='live-update-adc-text'),
-    html.Div(children=[
-        dcc.Graph(id='live-update-adc-graph')
-        ], style={'display': 'inline-block', 'width': '70%'}),
-
-    html.Div(id='live-update-gaussian-fit-text'),
+    
+    html.Div(id='live-update-heatmap-and-gaussian-fit-graph'),
     html.Div(children=[
         dcc.Graph(id='live-update-fitting-graph')
         ], style={'display': 'inline-block', 'width': '60%'}),
@@ -187,48 +181,105 @@ def update_time(n):
     return html.Span('Last reading time {}'.format(time_content))
 
 # Multiple components can update everytime interval gets fired.
-@app.callback([Output('live-update-adc-graph', 'figure'),
-                Output('live-update-fitting-graph','figure'),
+@app.callback([Output('live-update-fitting-graph','figure'),
                 Output(id='live-update-gaussian-fit-text')],
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n_inter):
-    x_label = ["CH0","CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8","CH9","CH10","CH11","CH12","CH13","CH14","CH15"]
+    x_label = ["CH0","CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8","CH9","CH10","CH11","CH12","CH13","CH14","CH15",
+               "CH16","CH17","CH18","CH19","CH20","CH21","CH22","CH23","CH24","CH25","CH26","CH27","CH28","CH29","CH30","CH31"]
+    y_label = ["CH32","CH33","CH34","CH35","CH36","CH37","CH38","CH39","CH40","CH41","CH42","CH43","CH44","CH45","CH46","CH47",
+               "CH48","CH49","CH50","CH51","CH52","CH53","CH54","CH55","CH56","CH57","CH58","CH59","CH60","CH61","CH62","CH63"]
     # reading voltage array and drawing a plot 
-    with open('temp/voltagetmp.npy', 'rb') as fv:
+    with open('temp/voltage64tmp.npy', 'rb') as fv:
         voltage_array = np.load(fv)
     
-    with open('temp/voltagepedestal.npy', 'rb') as fp:
+    with open('temp/voltage64pedestal.npy', 'rb') as fp:
         pedestal_array = np.load(fp)
     
     voltage_chs = np.mean(voltage_array,axis=1)
-    fig_adc = go.Figure(data=[go.Bar(x=x_label, y=voltage_chs)])
-    # Customize aspect
-    fig_adc.update_traces(marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',
-                  marker_line_width=1.5, opacity=0.6)
-    fig_adc.update_layout(title_text='ADC value live update',yaxis_range=[0.0,5.1],yaxis_title="Voltage (V)")
-    #fig = px.bar(voltage_chs, labels={'index': 'Channel #', 'value':'Voltage (V)'})
-    adc_num = 16
-    fiber_interval = 2.5 # fiber diameter as interval of each channel
-    lower_ = -1.0*adc_num/2
-    higher_ = 1.0*adc_num/2
-    x_array = np.linspace(lower_,higher_,adc_num)
+    axis_adc_num = 32
+    # x-axis ADC (ch0-31)
+    voltage_xaxis_chs = voltage_chs[:axis_adc_num]
+    pedestal_xaxis = pedestal_array[:axis_adc_num]
+
+    # y-axis ADC (ch32-63)
+    voltage_yaxis_chs = voltage_chs[axis_adc_num:]
+    pedestal_yaxis = pedestal_array[axis_adc_num:]
+    
+    
+    # Initialize the 2x2 grid layout with custom dimension for profile plots and heatmap
+    fig_heatprofile = make_subplots(
+        rows=2,
+        cols=2,
+        row_heights=[0.3, 0.7],  # Top row gets 30% height, bottom row gets 70%                                                                            
+        column_widths=[0.7, 0.3],  # Left col gets 70% width, right col gets 30%                                                                           
+        shared_xaxes=True,  # Binds top column chart and central heatmap X-axis                                                                            
+        shared_yaxes=True,  # Binds right bar chart and central heatmap Y-axis                                                                             
+        horizontal_spacing=0.03,
+        vertical_spacing=0.03,)   
+
+
+
+    fiber_interval = 2.4 # scintillator fiber diameter 
+    lower_ = -1.0*axis_adc_num/2
+    higher_ = 1.0*axis_adc_num/2
+    x_array = np.linspace(lower_,higher_,axis_adc_num)
     x_array = fiber_interval*x_array
-    mu,sigma,A,fit_array = gau_fit(x_array,voltage_chs,pedestal_array)
-    vol_substract = np.subtract(voltage_array,pedestal_array)
-    # mu,sigma,A,fit_array = gau_fit(x_array[8:],voltage_array[8:],pedestal_array[8:])
-    # vol_substract = np.subtract(voltage_array[8:],pedestal_array[8:])
 
+    mu_x,sigma_x,A_x,fit_xarray = gau_fit(x_array,voltage_xaxis_chs,pedestal_xaxis)
+    vol_xaxis_substract = np.subtract(voltage_xaxis_chs,pedestal_xaxis)
+    
     x_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
-    # x_line_array = np.linspace(0.0*fiber_interval,higher_*fiber_interval,1000)
-    y_line_array = gauss_fn(x_line_array,mu,sigma,A)
+    fitx_line_array = gauss_fn(x_line_array,mu_x,sigma_x,A_x)
 
-    fig_adcposition = go.Bar(x=x_array,y=vol_substract,name="Voltage_value")
-    fig_fitposition = go.Scatter(x=x_line_array,y=y_line_array,mode='lines',marker_size=20,name="fitted Gaussian")
-    fig_fit = go.Figure(data=[fig_adcposition,fig_fitposition])
+    fig_xaxis_adcposition = go.Bar(x=x_array,y=vol_xaxis_substract,name="X-axis Voltage")
+    fig_xaxis_fitposition = go.Scatter(x=x_line_array,y=fitx_line_array,mode='lines',marker_size=20,name="X-axis fitted Gaussian")
+    fig_fit_x = go.Figure(data=[fig_xaxis_adcposition,fig_xaxis_fitposition])
 
-    fig_fit.update_layout(title_text='Voltage and gaussian fit live update',yaxis_title="Voltage (V)")
-    fit_span = html.Span('Beam property: Mean {} mm, Sigma {} mm'.format(mu,sigma))
-    return fig_adc,fig_fit,fit_span
+    fig_heatprofile.add_trace(fig_fit_x,row=1,col=1)
+
+
+    mu_y,sigma_y,A_y,fit_yarray = gau_fit(y_array,voltage_yaxis_chs,pedestal_yaxis)
+    vol_yaxis_substract = np.subtract(voltage_yaxis_chs,pedestal_yaxis)
+    
+    y_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
+    fity_line_array = gauss_fn(y_line_array,mu_y,sigma_y,A_y)
+
+    fig_yaxis_adcposition = go.Bar(x=y_array,y=vol_yaxis_substract,orientation="h",name="Y-axis Voltage")
+    fig_yaxis_fitposition = go.Scatter(x=y_line_array,y=fity_line_array,orientation="h",mode='lines',marker_size=20,name="Y-axis fitted Gaussian")
+    fig_fit_y = go.Figure(data=[fig_yaxis_adcposition,fig_yaxis_fitposition])
+    fig_heatprofile.add_trace(fig_fit_y,row=2,col=2)
+
+    # heatmap of x-y cross voltage (we use outer product here)
+    hmvoltage = np.outer(voltage_xaxis_chs,voltage_yaxis_chs)
+    hmpedestal = np.outer(pedestal_xaxis,pedestal_yaxis)
+
+    hmvalue = np.subtract(hmvoltage,hmpedestal)
+
+    fig_heatmap = go.Heatmap(x=xlabel,y=ylabel,z=hmvalue,colorscale="Viridis",
+                             colorbar=dict(
+                                title="Value",
+                                thickness=15,
+                                x=1.1,  # Pushes the heatmap colorbar out past the right bar chart                                                                         
+                                ),
+                                showlegend=False)   
+    fig_heatprofile.add_trace(fig_heatmap,row=2,col=1)
+
+    # 7. Finalize layout modifications                                                                                                                     
+    fig_heatprofile.update_layout(
+        title=dict(text="Combined Heatmap, Column, and Bar Dashboard", x=0.5),
+        height=600,
+        width=900,
+        barmode="group",
+        template="plotly_white",
+    )
+
+    # Ensure the shared axis formatting remains aligned properly                                                                                           
+    fig_heatprofile.update_xaxes(row=1, col=1, showticklabels=False)  # Hide top X labels to avoid duplication                                                         
+    fig_heatprofile.update_yaxes(row=2, col=2, side="right")  # Put right-most Y-axis text on the outside edge
+
+    fit_span = html.Span('Beam property: Mean ({},{}) mm, Sigma ({},{}) mm'.format(mu_x,mu_y,sigma_x,sigma_y))
+    return fig_heatprofile,fit_span
 
 
 
