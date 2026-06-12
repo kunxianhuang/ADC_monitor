@@ -182,7 +182,7 @@ def update_time(n):
 
 # Multiple components can update everytime interval gets fired.
 @app.callback([Output('live-update-fitting-graph','figure'),
-                Output(id='live-update-gaussian-fit-text')],
+                Output('live-update-heatmap-and-gaussian-fit-graph','children')],
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n_inter):
     x_label = ["CH0","CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8","CH9","CH10","CH11","CH12","CH13","CH14","CH15",
@@ -201,7 +201,7 @@ def update_graph_live(n_inter):
     # x-axis ADC (ch0-31)
     voltage_xaxis_chs = voltage_chs[:axis_adc_num]
     pedestal_xaxis = pedestal_array[:axis_adc_num]
-
+    
     # y-axis ADC (ch32-63)
     voltage_yaxis_chs = voltage_chs[axis_adc_num:]
     pedestal_yaxis = pedestal_array[axis_adc_num:]
@@ -218,7 +218,7 @@ def update_graph_live(n_inter):
         horizontal_spacing=0.03,
         vertical_spacing=0.03,)   
 
-
+    
 
     fiber_interval = 2.4 # scintillator fiber diameter 
     lower_ = -1.0*axis_adc_num/2
@@ -255,7 +255,7 @@ def update_graph_live(n_inter):
     hmpedestal = np.outer(pedestal_xaxis,pedestal_yaxis)
 
     hmvalue = np.subtract(hmvoltage,hmpedestal)
-
+    print("Here")
     fig_heatmap = go.Heatmap(x=xlabel,y=ylabel,z=hmvalue,colorscale="Viridis",
                              colorbar=dict(
                                 title="Value",

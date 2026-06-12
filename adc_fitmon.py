@@ -189,7 +189,7 @@ def update_time(n):
 # Multiple components can update everytime interval gets fired.
 @app.callback([Output('live-update-adc-graph', 'figure'),
                 Output('live-update-fitting-graph','figure'),
-                Output(id='live-update-gaussian-fit-text')],
+                Output('live-update-gaussian-fit-text','children')],
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n_inter):
     x_label = ["CH0","CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8","CH9","CH10","CH11","CH12","CH13","CH14","CH15"]
