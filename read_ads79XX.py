@@ -19,7 +19,7 @@ from datetime import datetime
 import numpy as np
 from collections import deque
 
-PiPyADC_PATH = u'/Users/bean/work/pyana/PiPyADC'
+PiPyADC_PATH = u'/home/bean/work/prototypetest/PiPyADC'
 if PiPyADC_PATH not in sys.path:
     sys.path = [PiPyADC_PATH] + sys.path
 
@@ -75,6 +75,9 @@ def loop_infinite_measurements(adcFilename):
 
                 end = perf_counter()
                 exe_time = (end-start)
+
+
+
                 #print("execute time {}\n".format(exe_time))
                 #print("epoch {} channel {} execute time {}\n".format(epoch,chs,exe_time))
                 for ch,voltage in zip(ch_l,voltage_l):
@@ -151,7 +154,9 @@ def loop_infinite_64measurements(adcFilename):
 
                     end = perf_counter()
                     exe_time = (end-start)
+
                     #print("execute time {}\n".format(exe_time))
+
                     #print("epoch {} channel {} execute time {}\n".format(epoch,chs,exe_time))
                     for ch,voltage in zip(ch_la,voltage_l):
                         adcFile.write("CH:{:0>2d}\tVoltage:{:.4f}V\t\tTime:{}\n".format(ch,voltage,record_time))
