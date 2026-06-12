@@ -91,12 +91,12 @@ app.layout = html.Div(children=[
         )
     ],style={'width':"800px", 'margin':'0','left':'50%'}),
 
+    html.Div(id='live-update-adc-text'),
     
-    html.Div(id='live-update-heatmap-and-gaussian-fit-graph'),
     html.Div(children=[
         dcc.Graph(id='live-update-fitting-graph')
         ], style={'display': 'inline-block', 'width': '80%'}),
-
+    html.Div(id='live-update-gaussian-fit-text'),
     dcc.Interval(
         id='interval-component',
         interval=1*500, # in milliseconds
@@ -182,11 +182,7 @@ def update_time(n):
 
 # Multiple components can update everytime interval gets fired.
 @app.callback([Output('live-update-fitting-graph','figure'),
-<<<<<<< HEAD
-                Output('live-update-heatmap-and-gaussian-fit-graph','children')],
-=======
-                Output('live-update-gaussian-fit-text','children')],
->>>>>>> refs/remotes/origin/main
+               Output('live-update-gaussian-fit-text','children')],
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n_inter):
     x_label = ["CH0","CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8","CH9","CH10","CH11","CH12","CH13","CH14","CH15",
@@ -232,44 +228,52 @@ def update_graph_live(n_inter):
 
     mu_x,sigma_x,A_x,fit_xarray = gau_fit(x_array,voltage_xaxis_chs,pedestal_xaxis)
     vol_xaxis_substract = np.subtract(voltage_xaxis_chs,pedestal_xaxis)
+
     
     x_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
     fitx_line_array = gauss_fn(x_line_array,mu_x,sigma_x,A_x)
 
     fig_xaxis_adcposition = go.Bar(x=x_array,y=vol_xaxis_substract,marker_color="#2b5c8f",name="X-axis Voltage")
+    
     fig_xaxis_fitposition = go.Scatter(x=x_line_array,y=fitx_line_array,mode='lines',marker_size=20,name="X-axis fitted Gaussian")
     fig_fit_x = go.Figure(data=[fig_xaxis_adcposition,fig_xaxis_fitposition])
-
-    fig_heatprofile.add_trace(fig_fit_x,row=1,col=1)
-
-
+    fig_fit_x.update_layout(yaxis_range=[0.0,6.05],yaxis_title="Voltage (V)")
+    
+    #fig_heatprofile.add_trace(fig_fit_x,row=1,col=1)
+    fig_heatprofile.add_trace(fig_xaxis_adcposition,row=1,col=1)
+    
+    y_array = x_array
     mu_y,sigma_y,A_y,fit_yarray = gau_fit(y_array,voltage_yaxis_chs,pedestal_yaxis)
     vol_yaxis_substract = np.subtract(voltage_yaxis_chs,pedestal_yaxis)
     
     y_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
     fity_line_array = gauss_fn(y_line_array,mu_y,sigma_y,A_y)
 
-    fig_yaxis_adcposition = go.Bar(x=y_array,y=vol_yaxis_substract,orientation="h",marker_color="#d41dda",name="Y-axis Voltage")
+    fig_yaxis_adcposition = go.Bar(x=vol_yaxis_substract,y=y_array,orientation="h",marker_color="#d41dda",name="Y-axis Voltage")
+    
     fig_yaxis_fitposition = go.Scatter(x=y_line_array,y=fity_line_array,orientation="h",mode='lines',marker_size=20,name="Y-axis fitted Gaussian")
     fig_fit_y = go.Figure(data=[fig_yaxis_adcposition,fig_yaxis_fitposition])
-    fig_heatprofile.add_trace(fig_fit_y,row=2,col=2)
+    
+    #fig_heatprofile.add_trace(fig_fit_y,row=2,col=2)
+    fig_heatprofile.add_trace(fig_yaxis_adcposition,row=2,col=2)
 
+    
     # heatmap of x-y cross voltage (we use outer product here)
-    hmvoltage = np.outer(voltage_xaxis_chs,voltage_yaxis_chs)
-    hmpedestal = np.outer(pedestal_xaxis,pedestal_yaxis)
+    hmvoltage = np.outer(voltage_yaxis_chs,voltage_xaxis_chs)
+    hmpedestal = np.outer(pedestal_yaxis,pedestal_xaxis)
 
     hmvalue = np.subtract(hmvoltage,hmpedestal)
-    print("Here")
-    fig_heatmap = go.Heatmap(x=xlabel,y=ylabel,z=hmvalue,colorscale="Viridis",
+    
+    fig_heatmap = go.Heatmap(x=x_label,y=y_label,z=hmvalue,colorscale="Viridis",
                              colorbar=dict(
                                 title="Value",
                                 thickness=15,
-                                x=1.2,  # Pushes the heatmap colorbar out past the right bar chart                                                                         
+                                x=1.2,  # Pushes the heatmap colorbar out past the right bar chart
                                 ),
                                 showlegend=False)   
     fig_heatprofile.add_trace(fig_heatmap,row=2,col=1)
-
-    # 7. Finalize layout modifications                                                                                                                     
+    
+    # 7. Finalize layout modifications
     fig_heatprofile.update_layout(
         title=dict(text="Proton beam live-monitoring", x=0.5),
         height=600,
@@ -278,12 +282,16 @@ def update_graph_live(n_inter):
         template="plotly_white",
     )
 
-    # Ensure the shared axis formatting remains aligned properly                                                                                           
-    fig_heatprofile.update_xaxes(row=1, col=1, showticklabels=False)  # Hide top X labels to avoid duplication                                                         
+    # Ensure the shared axis formatting remains aligned properly  
+    fig_heatprofile.update_xaxes(row=1, col=1, showticklabels=False)  # Hide top X labels to avoid duplication
     fig_heatprofile.update_yaxes(row=2, col=2, side="right")  # Put right-most Y-axis text on the outside edge
+    
 
-    fit_span = html.Span('Beam property: Mean ({},{}) mm, Sigma ({},{}) mm'.format(mu_x,mu_y,sigma_x,sigma_y))
+    fit_span = html.Span('Beam property: Mean ({:.2f},{:.2f}) mm, Sigma ({:.2f},{:.2f}) mm'.format(mu_x,mu_y,sigma_x,sigma_y))
+    
+    
     return fig_heatprofile,fit_span
+
 
 
 
