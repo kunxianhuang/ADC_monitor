@@ -95,7 +95,7 @@ app.layout = html.Div(children=[
     html.Div(id='live-update-heatmap-and-gaussian-fit-graph'),
     html.Div(children=[
         dcc.Graph(id='live-update-fitting-graph')
-        ], style={'display': 'inline-block', 'width': '60%'}),
+        ], style={'display': 'inline-block', 'width': '80%'}),
 
     dcc.Interval(
         id='interval-component',
@@ -118,7 +118,7 @@ def PushStartADC(button_clicks):
         start_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = 'data/ADC_'+ start_time +'.txt'
 
-        p = multiprocessing.Process(target=loop_test,args=(filename,))
+        p = multiprocessing.Process(target=loop_infinite_64measurements,args=(filename,))
         p.start()
         prol.append(p)
         # disable StartADC button
@@ -182,7 +182,11 @@ def update_time(n):
 
 # Multiple components can update everytime interval gets fired.
 @app.callback([Output('live-update-fitting-graph','figure'),
+<<<<<<< HEAD
                 Output('live-update-heatmap-and-gaussian-fit-graph','children')],
+=======
+                Output('live-update-gaussian-fit-text','children')],
+>>>>>>> refs/remotes/origin/main
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n_inter):
     x_label = ["CH0","CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8","CH9","CH10","CH11","CH12","CH13","CH14","CH15",
@@ -232,7 +236,7 @@ def update_graph_live(n_inter):
     x_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
     fitx_line_array = gauss_fn(x_line_array,mu_x,sigma_x,A_x)
 
-    fig_xaxis_adcposition = go.Bar(x=x_array,y=vol_xaxis_substract,name="X-axis Voltage")
+    fig_xaxis_adcposition = go.Bar(x=x_array,y=vol_xaxis_substract,marker_color="#2b5c8f",name="X-axis Voltage")
     fig_xaxis_fitposition = go.Scatter(x=x_line_array,y=fitx_line_array,mode='lines',marker_size=20,name="X-axis fitted Gaussian")
     fig_fit_x = go.Figure(data=[fig_xaxis_adcposition,fig_xaxis_fitposition])
 
@@ -245,7 +249,7 @@ def update_graph_live(n_inter):
     y_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
     fity_line_array = gauss_fn(y_line_array,mu_y,sigma_y,A_y)
 
-    fig_yaxis_adcposition = go.Bar(x=y_array,y=vol_yaxis_substract,orientation="h",name="Y-axis Voltage")
+    fig_yaxis_adcposition = go.Bar(x=y_array,y=vol_yaxis_substract,orientation="h",marker_color="#d41dda",name="Y-axis Voltage")
     fig_yaxis_fitposition = go.Scatter(x=y_line_array,y=fity_line_array,orientation="h",mode='lines',marker_size=20,name="Y-axis fitted Gaussian")
     fig_fit_y = go.Figure(data=[fig_yaxis_adcposition,fig_yaxis_fitposition])
     fig_heatprofile.add_trace(fig_fit_y,row=2,col=2)
@@ -260,14 +264,14 @@ def update_graph_live(n_inter):
                              colorbar=dict(
                                 title="Value",
                                 thickness=15,
-                                x=1.1,  # Pushes the heatmap colorbar out past the right bar chart                                                                         
+                                x=1.2,  # Pushes the heatmap colorbar out past the right bar chart                                                                         
                                 ),
                                 showlegend=False)   
     fig_heatprofile.add_trace(fig_heatmap,row=2,col=1)
 
     # 7. Finalize layout modifications                                                                                                                     
     fig_heatprofile.update_layout(
-        title=dict(text="Combined Heatmap, Column, and Bar Dashboard", x=0.5),
+        title=dict(text="Proton beam live-monitoring", x=0.5),
         height=600,
         width=900,
         barmode="group",
