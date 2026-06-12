@@ -216,7 +216,6 @@ def update_graph_live(n_inter):
     mu,sigma,A,fit_array = gau_fit(x_array,voltage_chs,pedestal_array)
     vol_substract = np.subtract(voltage_chs,pedestal_array)
     
-
     x_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
     # x_line_array = np.linspace(0.0*fiber_interval,higher_*fiber_interval,1000)
     y_line_array = gauss_fn(x_line_array,mu,sigma,A)
