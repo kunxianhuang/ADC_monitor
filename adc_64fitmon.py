@@ -97,6 +97,12 @@ app.layout = html.Div(children=[
         dcc.Graph(id='live-update-fitting-graph')
         ], style={'display': 'inline-block', 'width': '80%'}),
     html.Div(id='live-update-gaussian-fit-text'),
+    html.Div(children=[
+        dcc.Graph(id='live-update-xaxis-fitting-graph')
+        ], style={'display': 'inline-block', 'width': '60%'}),
+    html.Div(children=[
+        dcc.Graph(id='live-update-yaxis-fitting-graph')
+        ], style={'display': 'inline-block', 'width': '60%'}),
     dcc.Interval(
         id='interval-component',
         interval=1*500, # in milliseconds
@@ -182,6 +188,8 @@ def update_time(n):
 
 # Multiple components can update everytime interval gets fired.
 @app.callback([Output('live-update-fitting-graph','figure'),
+               Output('live-update-xaxis-fitting-graph','figure'),
+               Output('live-update-yaxis-fitting-graph','figure'),
                Output('live-update-gaussian-fit-text','children')],
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n_inter):
@@ -238,8 +246,10 @@ def update_graph_live(n_inter):
     fig_xaxis_fitposition = go.Scatter(x=x_line_array,y=fitx_line_array,mode='lines',marker_size=20,name="X-axis fitted Gaussian")
     fig_fit_x = go.Figure(data=[fig_xaxis_adcposition,fig_xaxis_fitposition])
     fig_fit_x.update_layout(yaxis_range=[0.0,6.05],yaxis_title="Voltage (V)")
-    
-    #fig_heatprofile.add_trace(fig_fit_x,row=1,col=1)
+
+    fig_fit_x.update_layout(title_text='X-axis gaussian fitting',yaxis_title="Voltage (V)")
+
+
     fig_heatprofile.add_trace(fig_xaxis_adcposition,row=1,col=1)
     
     y_array = x_array
@@ -249,12 +259,15 @@ def update_graph_live(n_inter):
     y_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
     fity_line_array = gauss_fn(y_line_array,mu_y,sigma_y,A_y)
 
-    fig_yaxis_adcposition = go.Bar(x=vol_yaxis_substract,y=y_array,orientation="h",marker_color="#d41dda",name="Y-axis Voltage")
+    fig_yaxis_adcposition = go.Bar(x=vol_yaxis_substract,y=y_array,orientation="h",marker_color="#d41dda",name="Y-axis Voltage") # this bar chart is for heatmap
+    fig_yaxis_adcpositionforcomp = go.Bar(x=vol_yaxis_substract,y=y_array,orientation="h",marker_color="#d41dda",name="Y-axis Voltage") # this bar chart is for the comparison with gaussian fitting
+    
     
     fig_yaxis_fitposition = go.Scatter(x=y_line_array,y=fity_line_array,orientation="h",mode='lines',marker_size=20,name="Y-axis fitted Gaussian")
-    fig_fit_y = go.Figure(data=[fig_yaxis_adcposition,fig_yaxis_fitposition])
-    
-    #fig_heatprofile.add_trace(fig_fit_y,row=2,col=2)
+    fig_fit_y = go.Figure(data=[fig_yaxis_adcpositionforcomp,fig_yaxis_fitposition])
+    fig_fit_y.update_layout(title_text='Voltage and gaussian fit live update',yaxis_title="Voltage (V)")
+
+
     fig_heatprofile.add_trace(fig_yaxis_adcposition,row=2,col=2)
 
     
@@ -290,7 +303,7 @@ def update_graph_live(n_inter):
     fit_span = html.Span('Beam property: Mean ({:.2f},{:.2f}) mm, Sigma ({:.2f},{:.2f}) mm'.format(mu_x,mu_y,sigma_x,sigma_y))
     
     
-    return fig_heatprofile,fit_span
+    return fig_heatprofile,fig_fit_x,fig_fit_y,fit_span
 
 
 
