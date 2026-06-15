@@ -19,7 +19,12 @@ def gau_fit(x_array,voltage_array,pedestal_array):
     assert voltage_array.shape==pedestal_array.shape
     vol_substract = np.subtract(voltage_array,pedestal_array)
     assert vol_substract.shape==x_array.shape
-    popt, pcov = curve_fit(gauss_fn,x_array,vol_substract)
+    #guess initial value
+    mu0 = np.dot(x_array,vol_substract)/x_array.shape[0]
+    sigma0 = 5.0 # beam size 
+    A0 = np.max(vol_substract)
+    p0 = np.array([mu0,sigma0,A0])
+    popt, pcov = curve_fit(gauss_fn,x_array,vol_substract,p0=p0)
     mu = popt[0]
     sigma = popt[1]
     A = popt[2]
