@@ -258,7 +258,7 @@ def update_graph_live(n_inter):
     fity_line_array = gauss_fn(y_line_array,mu_y,sigma_y,A_y)
 
     fig_yaxis_adcposition = go.Bar(x=vol_yaxis_substract,y=y_array,orientation="h",marker_color="#d41dda",name="Y-axis Voltage") # this bar chart is for heatmap
-    fig_yaxis_adcpositionforcomp = go.Bar(x=vol_yaxis_substract,y=y_array,marker_color="#d41dda",name="Y-axis Voltage") # this bar chart is for the comparison with gaussian fitting
+    fig_yaxis_adcpositionforcomp = go.Bar(x=vol_yaxis_substract,y=y_array,marker_color="#d41dda",name="Y-axis Voltage 2") # this bar chart is for the comparison with gaussian fitting
     
     
     fig_yaxis_fitposition = go.Scatter(x=y_line_array,y=fity_line_array,orientation="h",mode='lines',marker_size=20,name="Y-axis fitted Gaussian")
