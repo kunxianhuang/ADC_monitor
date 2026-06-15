@@ -245,11 +245,9 @@ def update_graph_live(n_inter):
     
     fig_xaxis_fitposition = go.Scatter(x=x_line_array,y=fitx_line_array,mode='lines',marker_size=20,name="X-axis fitted Gaussian")
     fig_fit_x = go.Figure(data=[fig_xaxis_adcposition,fig_xaxis_fitposition])
-    fig_fit_x.update_layout(yaxis_range=[0.0,6.05],yaxis_title="Voltage (V)")
-
-    fig_fit_x.update_layout(title_text='X-axis gaussian fitting',yaxis_title="Voltage (V)")
 
 
+    fig_fit_x.update_layout(title_text='X-axis gaussian fitting',yaxis_range=[0.0,5.1],yaxis_title="Voltage (V)")
     fig_heatprofile.add_trace(fig_xaxis_adcposition,row=1,col=1)
     
     y_array = x_array
@@ -260,12 +258,12 @@ def update_graph_live(n_inter):
     fity_line_array = gauss_fn(y_line_array,mu_y,sigma_y,A_y)
 
     fig_yaxis_adcposition = go.Bar(x=vol_yaxis_substract,y=y_array,orientation="h",marker_color="#d41dda",name="Y-axis Voltage") # this bar chart is for heatmap
-    fig_yaxis_adcpositionforcomp = go.Bar(x=vol_yaxis_substract,y=y_array,orientation="h",marker_color="#d41dda",name="Y-axis Voltage") # this bar chart is for the comparison with gaussian fitting
+    fig_yaxis_adcpositionforcomp = go.Bar(x=vol_yaxis_substract,y=y_array,marker_color="#d41dda",name="Y-axis Voltage") # this bar chart is for the comparison with gaussian fitting
     
     
     fig_yaxis_fitposition = go.Scatter(x=y_line_array,y=fity_line_array,orientation="h",mode='lines',marker_size=20,name="Y-axis fitted Gaussian")
     fig_fit_y = go.Figure(data=[fig_yaxis_adcpositionforcomp,fig_yaxis_fitposition])
-    fig_fit_y.update_layout(title_text='Voltage and gaussian fit live update',yaxis_title="Voltage (V)")
+    fig_fit_y.update_layout(title_text='Y-axis gaussian fitting',yaxis_range=[0.0,5.1],yaxis_title="Voltage (V)")
 
 
     fig_heatprofile.add_trace(fig_yaxis_adcposition,row=2,col=2)
