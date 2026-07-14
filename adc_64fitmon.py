@@ -96,7 +96,7 @@ app.layout = html.Div(children=[
     html.Div(className='row', children=[
         html.Div(children=[
             dcc.Graph(id='live-update-fitting-graph')
-            ], style={'display': 'inline-block','width':'48%'}),
+            ], style={'display': 'inline-block','width':'55%'}),
         html.Div(className='column', children=[
             html.Div(children=[
                 dcc.Graph(id='live-update-xaxis-fitting-graph')
@@ -104,7 +104,7 @@ app.layout = html.Div(children=[
             html.Div(children=[
                 dcc.Graph(id='live-update-yaxis-fitting-graph')
                 ], style={'display': 'inline-block'}),
-        ], style={'display':'inline-block','width':'45%'})
+        ], style={'display':'inline-block','width':'40%'})
     ]),
     html.Div(id='live-update-gaussian-fit-text'),
     dcc.Interval(
@@ -303,7 +303,7 @@ def update_graph_live(n_inter):
     
 
     fit_span = html.Span('Beam property: Mean ({:.2f},{:.2f}) mm, Sigma ({:.2f},{:.2f}) mm'.format(mu_x,mu_y,sigma_x,sigma_y),
-                         style={'font-size': '18px'})
+                         style={'font-size': '26px'})
     
     
     return fig_heatprofile,fig_fit_x,fig_fit_y,fit_span
