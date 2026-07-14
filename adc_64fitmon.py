@@ -96,16 +96,16 @@ app.layout = html.Div(children=[
     html.Div(className='row', children=[
         html.Div(children=[
             dcc.Graph(id='live-update-fitting-graph')
-            ], style={'display': 'inline-block'}),
+            ], style={'display': 'inline-block','width':'48%'}),
         html.Div(className='column', children=[
             html.Div(children=[
                 dcc.Graph(id='live-update-xaxis-fitting-graph')
-                ], style={'display': 'inline-block'),
+                ], style={'display': 'inline-block'}),
             html.Div(children=[
                 dcc.Graph(id='live-update-yaxis-fitting-graph')
                 ], style={'display': 'inline-block'}),
-        ])
-    ])
+        ], style={'width':'45%'})
+    ]),
     html.Div(id='live-update-gaussian-fit-text'),
     dcc.Interval(
         id='interval-component',
