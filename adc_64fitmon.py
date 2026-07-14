@@ -104,7 +104,7 @@ app.layout = html.Div(children=[
             html.Div(children=[
                 dcc.Graph(id='live-update-yaxis-fitting-graph')
                 ], style={'display': 'inline-block'}),
-        ], style={'width':'45%'})
+        ], style={'display':'inline-block','width':'45%'})
     ]),
     html.Div(id='live-update-gaussian-fit-text'),
     dcc.Interval(
@@ -302,7 +302,8 @@ def update_graph_live(n_inter):
     fig_heatprofile.update_yaxes(row=2, col=2, side="right")  # Put right-most Y-axis text on the outside edge
     
 
-    fit_span = html.Span('Beam property: Mean ({:.2f},{:.2f}) mm, Sigma ({:.2f},{:.2f}) mm'.format(mu_x,mu_y,sigma_x,sigma_y))
+    fit_span = html.Span('Beam property: Mean ({:.2f},{:.2f}) mm, Sigma ({:.2f},{:.2f}) mm'.format(mu_x,mu_y,sigma_x,sigma_y),
+                         style={'font-size': '18px'})
     
     
     return fig_heatprofile,fig_fit_x,fig_fit_y,fit_span
