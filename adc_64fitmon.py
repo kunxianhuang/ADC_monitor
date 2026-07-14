@@ -93,16 +93,20 @@ app.layout = html.Div(children=[
 
     html.Div(id='live-update-adc-text'),
     
-    html.Div(children=[
-        dcc.Graph(id='live-update-fitting-graph')
-        ], style={'display': 'inline-block', 'width': '80%'}),
+    html.Div(className='row', children=[
+        html.Div(children=[
+            dcc.Graph(id='live-update-fitting-graph')
+            ], style={'display': 'inline-block'}),
+        html.Div(className='column', children=[
+            html.Div(children=[
+                dcc.Graph(id='live-update-xaxis-fitting-graph')
+                ], style={'display': 'inline-block'),
+            html.Div(children=[
+                dcc.Graph(id='live-update-yaxis-fitting-graph')
+                ], style={'display': 'inline-block'}),
+        ])
+    ])
     html.Div(id='live-update-gaussian-fit-text'),
-    html.Div(children=[
-        dcc.Graph(id='live-update-xaxis-fitting-graph')
-        ], style={'display': 'inline-block', 'width': '60%'}),
-    html.Div(children=[
-        dcc.Graph(id='live-update-yaxis-fitting-graph')
-        ], style={'display': 'inline-block', 'width': '60%'}),
     dcc.Interval(
         id='interval-component',
         interval=1*500, # in milliseconds
