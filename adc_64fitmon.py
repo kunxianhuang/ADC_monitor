@@ -114,6 +114,12 @@ app.layout = html.Div(children=[
         
 ])
 
+# loading pedestal and gain in advance
+with open('temp/voltage64pedestal.npy', 'rb') as fp:
+        pedestal_array = np.load(fp)
+
+with open('temp/relativegain64.npy', 'rb') as fg:
+        relgain_array = np.load(fg)
 
 
 @app.callback(
@@ -205,19 +211,18 @@ def update_graph_live(n_inter):
     with open('temp/voltage64tmp.npy', 'rb') as fv:
         voltage_array = np.load(fv)
     
-    with open('temp/voltage64pedestal.npy', 'rb') as fp:
-        pedestal_array = np.load(fp)
     
     voltage_chs = np.mean(voltage_array,axis=1)
     axis_adc_num = 32
-    # x-axis ADC (ch0-31)
+    # x-axis ADC (ch1-32)
     voltage_xaxis_chs = voltage_chs[:axis_adc_num]
     pedestal_xaxis = pedestal_array[:axis_adc_num]
-    
-    # y-axis ADC (ch32-63)
+    relgain_xaxis = relgain_array[:axis_adc_num]
+
+    # y-axis ADC (ch33-64)
     voltage_yaxis_chs = voltage_chs[axis_adc_num:]
     pedestal_yaxis = pedestal_array[axis_adc_num:]
-    
+    relgain_yaxis = relgain_array[axis_adc_num:]
     
     # Initialize the 2x2 grid layout with custom dimension for profile plots and heatmap
     fig_heatprofile = make_subplots(
@@ -238,14 +243,14 @@ def update_graph_live(n_inter):
     x_array = np.linspace(lower_,higher_,axis_adc_num)
     x_array = fiber_interval*x_array
 
-    mu_x,sigma_x,A_x,fit_xarray = gau_fit(x_array,voltage_xaxis_chs,pedestal_xaxis)
     vol_xaxis_substract = np.subtract(voltage_xaxis_chs,pedestal_xaxis)
-
+    mu_x,sigma_x,A_x,fit_xarray = gau_fit(x_array,vol_xaxis_substract,relgain_xaxis)
+    vol_xaxis_calgain = np.divide(vol_xaxis_substract,relgain_xaxis)
     
     x_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
     fitx_line_array = gauss_fn(x_line_array,mu_x,sigma_x,A_x)
 
-    fig_xaxis_adcposition = go.Bar(x=x_array,y=vol_xaxis_substract,marker_color="#2b5c8f",name="X-axis Voltage")
+    fig_xaxis_adcposition = go.Bar(x=x_array,y=vol_xaxis_calgain,marker_color="#2b5c8f",name="X-axis Voltage")
     
     fig_xaxis_fitposition = go.Scatter(x=x_line_array,y=fitx_line_array,mode='lines',marker_size=20,name="X-axis fitted Gaussian")
     fig_fit_x = go.Figure(data=[fig_xaxis_adcposition,fig_xaxis_fitposition])
@@ -255,13 +260,14 @@ def update_graph_live(n_inter):
     fig_heatprofile.add_trace(fig_xaxis_adcposition,row=1,col=1)
     
     y_array = x_array
-    mu_y,sigma_y,A_y,fit_yarray = gau_fit(y_array,voltage_yaxis_chs,pedestal_yaxis)
     vol_yaxis_substract = np.subtract(voltage_yaxis_chs,pedestal_yaxis)
+    mu_y,sigma_y,A_y,fit_yarray = gau_fit(y_array,vol_yaxis_substract,relgain_yaxis)
+    vol_yaxis_calgain = np.divide(vol_yaxis_substract,relgain_yaxis)
     
     y_line_array = np.linspace(lower_*fiber_interval,higher_*fiber_interval,1000)
     fity_line_array = gauss_fn(y_line_array,mu_y,sigma_y,A_y)
 
-    fig_yaxis_adcposition = go.Bar(x=vol_yaxis_substract,y=y_array,orientation="h",marker_color="#d41dda",name="Y-axis Voltage") # this bar chart is for heatmap
+    fig_yaxis_adcposition = go.Bar(x=vol_yaxis_calgain,y=y_array,orientation="h",marker_color="#d41dda",name="Y-axis Voltage") # this bar chart is for heatmap
     fig_yaxis_adcpositionforcomp = go.Bar(x=y_array,y=vol_yaxis_substract,marker_color="#d41dda",name="Y-axis Voltage 2") # this bar chart is for the comparison with gaussian fitting
     
     
@@ -278,6 +284,8 @@ def update_graph_live(n_inter):
     hmpedestal = np.outer(pedestal_yaxis,pedestal_xaxis)
 
     hmvalue = np.subtract(hmvoltage,hmpedestal)
+    hmgain = np.outer(relgain_yaxis,relgain_xaxis)
+    hmvalue = np.divide(hmvalue,hmgain)
     
     fig_heatmap = go.Heatmap(x=x_label,y=y_label,z=hmvalue,colorscale="Viridis",
                              colorbar=dict(
