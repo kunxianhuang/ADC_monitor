@@ -15,16 +15,16 @@ def gauss_fn(x,mu,sigma,A):
 
 
 
-def gau_fit(x_array,voltage_array,pedestal_array):
-    assert voltage_array.shape==pedestal_array.shape
-    vol_substract = np.subtract(voltage_array,pedestal_array)
-    assert vol_substract.shape==x_array.shape
+def gau_fit(x_array,voltagesub_array,relgain_array):
+    assert voltagesub_array.shape==relgain_array.shape
+    assert voltagesub_array.shape==x_array.shape
+    vol_calgain = np.divide(voltagesub_array,relgain_array)
     #guess initial value
-    mu0 = np.dot(x_array,vol_substract)/x_array.shape[0]
+    mu0 = np.dot(x_array,vol_calgain)/x_array.shape[0]
     sigma0 = 5.0 # beam size 
-    A0 = np.max(vol_substract)
+    A0 = np.max(vol_calgain)
     p0 = np.array([mu0,sigma0,A0])
-    popt, pcov = curve_fit(gauss_fn,x_array,vol_substract,p0=p0)
+    popt, pcov = curve_fit(gauss_fn,x_array,vol_calgain,p0=p0)
     mu = popt[0]
     sigma = popt[1]
     A = popt[2]
