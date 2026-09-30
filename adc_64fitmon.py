@@ -197,10 +197,10 @@ def update_time(n):
                Output('live-update-gaussian-fit-text','children')],
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n_inter):
-    x_label = ["CH0","CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8","CH9","CH10","CH11","CH12","CH13","CH14","CH15",
-               "CH16","CH17","CH18","CH19","CH20","CH21","CH22","CH23","CH24","CH25","CH26","CH27","CH28","CH29","CH30","CH31"]
-    y_label = ["CH32","CH33","CH34","CH35","CH36","CH37","CH38","CH39","CH40","CH41","CH42","CH43","CH44","CH45","CH46","CH47",
-               "CH48","CH49","CH50","CH51","CH52","CH53","CH54","CH55","CH56","CH57","CH58","CH59","CH60","CH61","CH62","CH63"]
+    x_label = ["CH1","CH2","CH3","CH4","CH5","CH6","CH7","CH8","CH9","CH10","CH11","CH12","CH13","CH14","CH15","CH16",
+               "CH17","CH18","CH19","CH20","CH21","CH22","CH23","CH24","CH25","CH26","CH27","CH28","CH29","CH30","CH31","CH32"]
+    y_label = ["CH33","CH34","CH35","CH36","CH37","CH38","CH39","CH40","CH41","CH42","CH43","CH44","CH45","CH46","CH47","CH48"
+               "CH48","CH49","CH50","CH51","CH52","CH53","CH54","CH55","CH56","CH57","CH58","CH59","CH60","CH61","CH62","CH63","CH64"]
     # reading voltage array and drawing a plot 
     with open('temp/voltage64tmp.npy', 'rb') as fv:
         voltage_array = np.load(fv)

@@ -114,7 +114,8 @@ def loop_infinite_measurements(adcFilename):
 
 def loop_infinite_64measurements(adcFilename):
     # Arbitrary length tuple of input channel pair values to scan sequentially
-    CH_SEQUENCE = 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+    # start from 1 not 0
+    CH_SEQUENCE = 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
 
     p = multiprocessing.current_process()
 
@@ -147,7 +148,7 @@ def loop_infinite_64measurements(adcFilename):
                     voltage_l=[]
                     for raw_channel in raw_channels:
                         ch, voltage = raw_to_voltage(raw_channel,ads.v_per_digit)
-                        ch_l.append(ch)
+                        ch_l.append(int(ch)+1) # start from 1 
                         voltage_l.append(voltage)
                     ch_la = np.array(ch_l)
                     ch_la = ch_la + board_num*16
@@ -161,7 +162,8 @@ def loop_infinite_64measurements(adcFilename):
                     for ch,voltage in zip(ch_la,voltage_l):
                         adcFile.write("CH:{:0>2d}\tVoltage:{:.4f}V\t\tTime:{}\n".format(ch,voltage,record_time))
                         try:
-                            voltage_deque[ch].appendleft(voltage)
+                            # as channel start from 1, we insert deque from 0, so index is ch-1
+                            voltage_deque[ch-1].appendleft(voltage) 
                         except IndexError:
                             pass
                 
